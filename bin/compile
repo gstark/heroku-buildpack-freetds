@@ -35,14 +35,11 @@ trap 'finish_error $LINENO' ERR
 logstamp() { printf "[%s]" "$(TZ='America/Chicago' date +'%Y-%m-%d %H:%M:%S')" ; }
 topic()    { echo "-----> $(logstamp) $*" ; }
 info()     { echo "       $*" ; }
-HEROKU_FREETDS_BUILDPACK_DEBUG="${HEROKU_FREETDS_BUILDPACK_DEBUG:-false}"
 debug()   {
   echo "[DEBUG] $*"
 }
 debug_topic() {
-  if [ "$HEROKU_FREETDS_BUILDPACK_DEBUG" = "true" ]; then
-    echo "[DEBUG] -----> $*"
-  fi
+  echo "[DEBUG] -----> $*"
 }
 error()    { echo " !     $*" ;  >&2 exit 1  ; }
 indent() {
@@ -163,9 +160,7 @@ download_and_extract_freetds_archive() {
   # TODO(BF): Consider calculating and verifying SHA256: openssl dgst -sha256 < "$FREETDS_FILE"
   curl -s "$FREETDS_URL" | tar xzvf - -C "${BUILD_DIR}" > "${BUILD_DIR}/build_log-unpack.log" # Can't write to the archive dir until it exists
   mv "${BUILD_DIR}/build_log-unpack.log" "${BUILD_DIR}/${FREETDS_ARCHIVE_NAME}/"
-  if [ "$HEROKU_FREETDS_BUILDPACK_DEBUG" = "true" ]; then
-    debug "$(cat "${BUILD_DIR}/build_log-unpack.log")"
-  fi
+  debug "$(cat "${BUILD_DIR}/build_log-unpack.log")"
 }
 
 build_and_install_freetds() {
@@ -196,19 +191,15 @@ build_and_install_freetds() {
       "--with-tdsver=${TDS_VERSION}"
 EOF
     /bin/bash .build_options > build_log-configure.stdout.log 2> build_log-configure.stderr.log
-    if [ "$HEROKU_FREETDS_BUILDPACK_DEBUG" = "true" ]; then
-      debug "$(cat .build_options)"
-      debug "$(cat build_log-configure.stdout.log)"
-      debug "$(cat build_log-configure.stderr.log)"
-    fi
+    debug "$(cat .build_options)"
+    debug "$(cat build_log-configure.stdout.log)"
+    debug "$(cat build_log-configure.stderr.log)"
     # Flush make output to log since a file will be faster than printing to the screen.
     {
       make && make install && make clean
     } > build_log-make_install.stdout.log 2> build_log-make_install.stderr.log
-    if [ "$HEROKU_FREETDS_BUILDPACK_DEBUG" = "true" ]; then
-      debug "$(cat build_log-make_install.stdout.log)"
-      debug "$(cat build_log-make_install.stderr.log)"
-    fi
+    debug "$(cat build_log-make_install.stdout.log)"
+    debug "$(cat build_log-make_install.stderr.log)"
     cp .build_options build_log-* "${APP_TARGET_DIR}/"
 
     cd "$BUILD_DIR"
