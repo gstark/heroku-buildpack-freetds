@@ -37,9 +37,7 @@ topic()    { echo "-----> $(logstamp) $*" ; }
 info()     { echo "       $*" ; }
 HEROKU_FREETDS_BUILDPACK_DEBUG="${HEROKU_FREETDS_BUILDPACK_DEBUG:-false}"
 debug()   {
-  if [ "$HEROKU_FREETDS_BUILDPACK_DEBUG" = "true" ]; then
-    echo "[DEBUG] $*"
-  fi
+  echo "[DEBUG] $*"
 }
 debug_topic() {
   if [ "$HEROKU_FREETDS_BUILDPACK_DEBUG" = "true" ]; then
